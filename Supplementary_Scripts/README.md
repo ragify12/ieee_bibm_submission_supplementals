@@ -1,49 +1,80 @@
 # Supplementary Scripts
 
-Analysis scripts for: Paladugu & Alam, "Computational De Novo Design of
-Miniprotein Candidate Neutralizers Targeting the IL-23 Cytokine Subunit p19,"
-IEEE BIBM 2026.
+Analysis and scoring scripts used to produce the supplementary data files for:
+
+> Paladugu & Alam, "Computational De Novo Design of Miniprotein Candidate
+> Neutralizers Targeting the IL-23 Cytokine Subunit p19," IEEE BIBM 2026.
+
+All scripts were run on the Zaratan HPC cluster (University of Maryland)
+with NVIDIA A100 (40 GB) GPUs under SLURM.
+
+---
+
+## Script-to-data mapping
+
+| Script | Produces | Notes |
+|--------|----------|-------|
+| `prep_global_renumber.py` | Preprocessed PDBs for AF2-initial-guess | Renumbers residues globally and continuously; required before `slurm_af2ig_full.sh` |
+| `slurm_af2ig_full.sh` | AF2-initial-guess predictions for all 972 conventional designs | SLURM array job (4 chunks); output fed into ipSAE scoring to produce **S5** |
+| `00_extract_lead_metrics.py` | `../Supplementary_S4_lead_metrics.csv` | Reads BindCraft per-design statistics CSVs; no GPU required |
+| `leads_vs_p40.py build` | `p40_inputs/` FASTA files | Prepares one binder:p40 FASTA per lead for ColabFold |
+| `run_p40_zaratan.sbatch` | ColabFold predictions in `p40_out/` | Submits 5-model/3-recycle ColabFold-Multimer jobs on Zaratan |
+| `collect_p40_robust.py` | `../Supplementary_S3_p40_selectivity.csv` | Parses ColabFold outputs, calls reference `ipsae.py`, writes S3 |
 
 ---
 
 ## Run order
 
-| # | Script | Needs | Output |
-|---|--------|-------|--------|
-| 1 | `00_extract_lead_metrics.py` | BindCraft CSVs only | `../Supplementary_S4_lead_metrics.csv` — hotspot RMSD + design-time ipTM/pTM/iPAE/pLDDT/ΔG/dSASA/SC/HB for the 5 leads |
-| 2 | `01_counter_screen.py` | ColabFold + ipSAE + 3DUH | ipSAE of each lead vs p19 / p40 (backs `../Supplementary_S3_p40_selectivity.csv`) |
-| 3 | `02_novelty_search.py` | Foldseek + MMseqs2 + DBs | best structural TM-score + sequence identity per lead |
-| 4 | `03_iptm_actifptm_ipsae.py` | AF2 outputs + ipSAE + actifpTM | ipSAE vs ipTM vs actifpTM on the same prediction |
-| 5 | `leads_vs_p40.py` | ColabFold + ipSAE + p40 structure | per-lead p40 ipSAE/ipTM (fast single-model screen) |
-| 6 | `run_p40_zaratan.sbatch` | SLURM + above scripts | submits the full 5-model/3-recycle p40 counter-screen on Zaratan |
+### S5 — 972 conventional design scores
+```bash
+# 1. Renumber PDBs (run per-design or in a loop)
+python prep_global_renumber.py input.pdb output.pdb
 
-Scripts 1 runs anywhere (no GPU). Scripts 2-6 require a cluster.
+# 2. Run AF2-initial-guess as SLURM array
+sbatch slurm_af2ig_full.sh
+
+# 3. Score outputs with reference ipsae.py (Dunbrack lab) to produce S5
+```
+
+### S4 — Lead metrics
+```bash
+python 00_extract_lead_metrics.py \
+    --p19  final_design_stats_p19.csv \
+    --full final_design_stats.csv \
+    --out  ../Supplementary_S4_lead_metrics.csv
+```
+
+### S3 — p40 counter-screen
+```bash
+# 1. Build per-lead FASTAs
+python leads_vs_p40.py build
+
+# 2. Submit ColabFold jobs
+sbatch run_p40_zaratan.sbatch
+
+# 3. Collect results and compute ipSAE
+python collect_p40_robust.py
+```
 
 ---
 
-## Confirmed metric values (S4)
+## Prerequisites
 
-`00_extract_lead_metrics.py` reads existing BindCraft statistics — no new
-predictions needed. Confirmed output matches `../Supplementary_S4_lead_metrics.csv`:
-
-| Lead | Hotspot RMSD (A) | ipTM | pTM | iPAE | pLDDT | dG (REU) |
-|------|-----------------|------|-----|------|-------|----------|
-| l94  | 1.69 | 0.86 | 0.88 | 0.18 | 0.93 | -57.5 |
-| l104 | 1.50 | 0.90 | 0.90 | 0.17 | 0.96 | -84.9 |
-| l72  | 1.37 | 0.91 | 0.85 | 0.20 | 0.95 | -87.3 |
-| l92  | 3.17 | 0.92 | 0.85 | 0.26 | 0.90 | -77.0 |
-| l83  | 1.86 | 0.88 | 0.83 | 0.26 | 0.92 | -75.0 |
-
-Notable: l94 is best by ipSAE (0.804) but worst by design-time ipTM (0.86) --
-direct evidence that ipTM is a poor discriminator at the top of the quality range.
+- ColabFold ≥ 1.5.5 (`colabfold_batch`)
+- AF2-initial-guess (`dl_binder_design` repo, `af2_initial_guess/predict.py`)
+- Reference `ipsae.py` (Dunbrack lab, bioRxiv 2025.02.10.637595)
+- Python ≥ 3.9 with: `pandas`, `biopython`, `numpy`
 
 ---
 
-## Notes
+## Confirmed output values (S3)
 
-- ipsae.py calls assume the reference Dunbrack script; swap in your validated
-  implementation by editing run_ipsae() / get_ipsae().
-- 01_* runs only the p40 arm by default; IL-12 arm needs the p35 (IL12A)
-  sequence (UniProt P29459).
-- 02_* needs the binder chain ID in your complex PDBs (--binder-chain).
-- None of these scripts invent data; they only orchestrate your tools and parse outputs.
+All five leads return ipSAE = 0.00 against p40 under full 5-model/3-recycle scoring:
+
+| Lead | ipSAE (p40) | ipTM (p40) |
+|------|-------------|------------|
+| l94  | 0.00 | 0.12 |
+| l104 | 0.00 | 0.12 |
+| l72  | 0.00 | 0.11 |
+| l92  | 0.00 | 0.12 |
+| l83  | 0.00 | 0.12 |

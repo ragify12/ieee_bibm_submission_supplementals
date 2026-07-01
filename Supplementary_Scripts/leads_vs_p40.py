@@ -25,11 +25,11 @@ SEQ_COL  = "Sequence"          # confirmed column name in your BindCraft CSVs
 
 # p40 sequence. EASIEST: paste UniProt IL12B (P29460) mature chain here.
 # Or leave blank and set PDB_3DUH to extract chain A (the exact p40 you targeted).
-P40_SEQ   = ""
+P40_SEQ   = "IWELKKDVYVVELDWYPDAPGEMVVLTCDTPEEDGITWTLDQSSEVLGSGKTLTIQVKEFGDAGQYTCHKGGEVLSHSLLLLHKKEDGIWSTDILKDQKEPKNKTFLRCEAKNYSGRFTCWWLTTISTDLTFSVKSSRGSSDPQGVTCGAATLSAERVRGDNKEYEYSVECQEDSACPAAEESLPIEVMVDAVHKLKYENYTSSFFIRDIIKPDPPKNLQLKPLKNSRQVEVSWEYPDTWSTPHSYFSLTFCVQVQGKSKREKKDRVFTDKTSATVICRKNASISVRAQDRYYSSSWSEWASVPCS"
 PDB_3DUH  = "3duh.pdb"
 P40_CHAIN = "A"
 
-IPSAE_PY    = "ipsae.py"        # path to reference ipsae.py (or your own script)
+IPSAE_PY    = "/scratch/zt1/project/fardina-prj/user/rpala06/IPSAE/ipsae.py"        # path to reference ipsae.py (or your own script)
 PAE_CUTOFF  = 10
 DIST_CUTOFF = 10
 
@@ -74,14 +74,23 @@ def ipsae_max(pdb, pae_json):
     txt = f"{os.path.splitext(pdb)[0]}_{PAE_CUTOFF}_{DIST_CUTOFF}.txt"
     vals = []
     with open(txt) as fh:
-        hdr = fh.readline().split()
+        hdr = None
+        for line in fh:
+            parts = line.split()
+            if parts:
+                hdr = parts
+                break
+        if hdr is None:
+            return 0.0
         c = hdr.index("ipSAE") if "ipSAE" in hdr else None
         for line in fh:
-            p = line.split()
-            if c is not None and len(p) > c:
-                try: vals.append(float(p[c]))
-                except ValueError: pass
-    return max(vals) if vals else None
+            parts = line.split()
+            if c is not None and len(parts) > c:
+                try:
+                    vals.append(float(parts[c]))
+                except ValueError:
+                    pass
+    return max(vals) if vals else 0.0
 
 
 def collect():
