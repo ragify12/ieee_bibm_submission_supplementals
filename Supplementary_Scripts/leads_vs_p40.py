@@ -29,7 +29,7 @@ P40_SEQ   = "IWELKKDVYVVELDWYPDAPGEMVVLTCDTPEEDGITWTLDQSSEVLGSGKTLTIQVKEFGDAGQYT
 PDB_3DUH  = "3duh.pdb"
 P40_CHAIN = "A"
 
-IPSAE_PY    = "/scratch/zt1/project/fardina-prj/user/rpala06/IPSAE/ipsae.py"        # path to reference ipsae.py (or your own script)
+IPSAE_PY    = "/path/to/project/IPSAE/ipsae.py"        # path to reference ipsae.py (or your own script)
 PAE_CUTOFF  = 10
 DIST_CUTOFF = 10
 

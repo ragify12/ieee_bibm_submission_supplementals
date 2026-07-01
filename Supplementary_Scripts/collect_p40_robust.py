@@ -1,7 +1,7 @@
 import os, glob, json, csv, subprocess
 
 OUTDIR = "p40_out"
-IPSAE_PY = "/scratch/zt1/project/fardina-prj/user/rpala06/IPSAE/ipsae.py"
+IPSAE_PY = "/path/to/project/IPSAE/ipsae.py"
 PAE_CUTOFF = 10
 DIST_CUTOFF = 10
 LEADS = ["l72", "l83", "l92", "l94", "l104"]

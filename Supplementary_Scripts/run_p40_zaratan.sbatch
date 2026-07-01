@@ -8,7 +8,7 @@
 #SBATCH --output=p40_full_%j.log
 #SBATCH --error=p40_full_%j.err
 
-cd /scratch/zt1/project/fardina-prj/user/rpala06
+cd /path/to/project
 
 echo "===== JOB START ====="
 date
@@ -33,11 +33,11 @@ module load cudnn/8.9.2 2>&1 || true
 module list 2>&1 || true
 
 echo "===== CONDA ENV ====="
-source /scratch/zt1/project/fardina-prj/user/rpala06/miniforge3/etc/profile.d/conda.sh
+source /path/to/project/miniforge3/etc/profile.d/conda.sh
 conda activate SE3nv
 
-export XDG_CACHE_HOME=/scratch/zt1/project/fardina-prj/user/rpala06/.cache
-export COLABFOLD_DATA=/scratch/zt1/project/fardina-prj/user/rpala06/colabfold_data
+export XDG_CACHE_HOME=/path/to/project/.cache
+export COLABFOLD_DATA=/path/to/project/colabfold_data
 mkdir -p "$XDG_CACHE_HOME" "$COLABFOLD_DATA"
 
 echo "CONDA=$CONDA_DEFAULT_ENV"
@@ -63,7 +63,7 @@ python leads_vs_p40.py build
 
 echo "===== RUN COLABFOLD FAST SINGLE-SEQUENCE ====="
 colabfold_batch \
-  --data /scratch/zt1/project/fardina-prj/user/rpala06/colabfold_data \
+  --data /path/to/project/colabfold_data \
   --msa-mode single_sequence \
   --num-models 5 \
   --num-recycle 3 \

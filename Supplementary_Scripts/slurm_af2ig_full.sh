@@ -10,9 +10,9 @@
 #SBATCH --time=18:00:00
 #SBATCH --output=af2ig_full_%A_%a.out
 #SBATCH --error=af2ig_full_%A_%a.err
-#SBATCH -A fardina-prj-aac
+#SBATCH -A your-slurm-account
 
-cd /scratch/zt1/project/fardina-prj/user/rpala06/dl_binder_design
+cd /path/to/project/dl_binder_design
 module load cuda/12.3.0/gcc/11.3.0/zen2
 module load cudnn/8.9.7.29-12/gcc/11.3.0/zen2
 source ~/miniforge3/bin/activate; conda activate af2_binder_design
