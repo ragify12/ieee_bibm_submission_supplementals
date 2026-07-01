@@ -6,9 +6,9 @@ Two modes:
   build    -> writes one ColabFold FASTA per lead: binder : p40   (binder+p40 complex)
   collect  -> runs ipSAE on each ColabFold prediction and writes p40_selectivity.csv
 
-Run order on Zaratan:
+Run order on the institutional HPC cluster:
   python leads_vs_p40.py build          # make FASTAs
-  colabfold_batch  p40_inputs/  p40_out/   (done by the sbatch, see run_p40_zaratan.sbatch)
+  colabfold_batch  p40_inputs/  p40_out/   (done by the sbatch, see run_p40_the institutional HPC cluster.sbatch)
   python leads_vs_p40.py collect        # ipSAE + table
 
 Expected (if selective): every lead's p40 ipSAE sits far below 0.60, near the

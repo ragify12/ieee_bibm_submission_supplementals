@@ -2,7 +2,7 @@
 
 Supplementary materials for:
 
-> Anonymous, "Computational De Novo Design of Miniprotein Candidate
+> Paladugu & Alam, "Computational De Novo Design of Miniprotein Candidate
 > Neutralizers Targeting the IL-23 Cytokine Subunit p19," IEEE BIBM 2026.
 
 ---

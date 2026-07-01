@@ -2,10 +2,10 @@
 
 Analysis and scoring scripts used to produce the supplementary data files for:
 
-> Anonymous, "Computational De Novo Design of Miniprotein Candidate
+> Paladugu & Alam, "Computational De Novo Design of Miniprotein Candidate
 > Neutralizers Targeting the IL-23 Cytokine Subunit p19," IEEE BIBM 2026.
 
-All scripts were run on the Zaratan HPC cluster (University of Maryland)
+All scripts were run on the the institutional HPC cluster
 with NVIDIA A100 (40 GB) GPUs under SLURM.
 
 ---
@@ -18,7 +18,7 @@ with NVIDIA A100 (40 GB) GPUs under SLURM.
 | `slurm_af2ig_full.sh` | AF2-initial-guess predictions for all 972 conventional designs | SLURM array job (4 chunks); output fed into ipSAE scoring to produce **S5** |
 | `00_extract_lead_metrics.py` | `../Supplementary_S4_lead_metrics.csv` | Reads BindCraft per-design statistics CSVs; no GPU required |
 | `leads_vs_p40.py build` | `p40_inputs/` FASTA files | Prepares one binder:p40 FASTA per lead for ColabFold |
-| `run_p40_zaratan.sbatch` | ColabFold predictions in `p40_out/` | Submits 5-model/3-recycle ColabFold-Multimer jobs on Zaratan |
+| `run_p40_the institutional HPC cluster.sbatch` | ColabFold predictions in `p40_out/` | Submits 5-model/3-recycle ColabFold-Multimer jobs on the institutional HPC cluster |
 | `collect_p40_robust.py` | `../Supplementary_S3_p40_selectivity.csv` | Parses ColabFold outputs, calls reference `ipsae.py`, writes S3 |
 
 ---
@@ -50,7 +50,7 @@ python 00_extract_lead_metrics.py \
 python leads_vs_p40.py build
 
 # 2. Submit ColabFold jobs
-sbatch run_p40_zaratan.sbatch
+sbatch run_p40_the institutional HPC cluster.sbatch
 
 # 3. Collect results and compute ipSAE
 python collect_p40_robust.py
