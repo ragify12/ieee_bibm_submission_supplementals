@@ -1,4 +1,4 @@
-# il23-miniprotein-binder-design — Supplementary Data
+# ieee_bibm_submission_supplementals: Supplementary Data
 
 Supplementary materials for:
 
